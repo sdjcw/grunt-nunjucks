@@ -12,17 +12,7 @@ module.exports = function (grunt) {
     var nunjucks = require('nunjucks');
     var lib = require('nunjucks/src/lib');
 
-    grunt.registerMultiTask('nunjucks', 'Precompile nunjucks', function () {
-        // Merge task-specific and/or target-specific options with these defaults.
-        var opts = this.options({
-            asFunction: false,
-            env: null
-        });
-
-        var nameFunc = lib.isFunction(opts.name) ? opts.name : function(filepath) {
-            return filepath;
-        };
-
+    grunt.registerMultiTask('nunjucks', 'Render nunjucks', function () {
         this.files.forEach(function (f) {
             var src = f.src.filter(function (filepath) {
                 if (!grunt.file.exists(filepath)) {
@@ -31,7 +21,7 @@ module.exports = function (grunt) {
                 } else {
                     return true;
                 }
-            }).map(function(filepath) {
+            }).forEach(function(filepath) {
                 var filename = filepath;
                 if (f.baseDir) {
                     if (f.baseDir.substr(-1) !== '/') {
@@ -43,12 +33,10 @@ module.exports = function (grunt) {
                         filename = filepath.substr(f.baseDir.length);
                     }
                 }
-                opts.name = nameFunc(filename);
-                return nunjucks.precompile(filepath, opts);
-            }).join('');
-
-            grunt.file.write(f.dest, src);
-            grunt.log.writeln('File "' + f.dest + '" created.');
+                var result = nunjucks.render(filepath);
+                grunt.file.write(f.destDir + '/' + filename, result);
+                grunt.log.writeln('File "' + f.destDir + '/' + filename + '" created.');
+            });
         });
     });
 };
