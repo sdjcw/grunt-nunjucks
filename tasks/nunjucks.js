@@ -8,6 +8,10 @@
 
 'use strict';
 
+var fs = require('fs');
+var os = require('os');
+var path = require('path');
+
 module.exports = function (grunt) {
     var nunjucks = require('nunjucks');
     var lib = require('nunjucks/src/lib');
@@ -33,7 +37,21 @@ module.exports = function (grunt) {
                         filename = filepath.substr(f.baseDir.length);
                     }
                 }
-                var result = nunjucks.render(filepath);
+
+                var context = {
+                    multiExtends: function(baseFile, blockFiles) {
+                        var resolveFilePath = function(filename) {
+                          return path.resolve(path.dirname(filepath), filename);
+                        };
+                        var blockSources = blockFiles.map(function(filename) {
+                          return fs.readFileSync(resolveFilePath(filename))
+                        });
+                        var source = '{% extends "' + resolveFilePath(baseFile) + '" %}' + os.EOL + blockSources.join(os.EOL);
+                        return nunjucks.renderString(source, context);
+                    }
+                };
+
+                var result = nunjucks.render(filepath, context);
                 grunt.file.write(f.destDir + '/' + filename, result);
                 grunt.log.writeln('File "' + f.destDir + '/' + filename + '" created.');
             });
