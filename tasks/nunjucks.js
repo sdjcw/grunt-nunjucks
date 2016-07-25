@@ -13,6 +13,7 @@ module.exports = function (grunt) {
     var lib = require('nunjucks/src/lib');
 
     grunt.registerMultiTask('nunjucks', 'Render nunjucks', function () {
+        var data =  this.data.options.data;
         this.files.forEach(function (f) {
             var src = f.src.filter(function (filepath) {
                 if (!grunt.file.exists(filepath)) {
@@ -33,7 +34,7 @@ module.exports = function (grunt) {
                         filename = filepath.substr(f.baseDir.length);
                     }
                 }
-                var result = nunjucks.render(filepath);
+                var result = nunjucks.render(filepath, data);
                 grunt.file.write(f.destDir + '/' + filename, result);
                 grunt.log.writeln('File "' + f.destDir + '/' + filename + '" created.');
             });
