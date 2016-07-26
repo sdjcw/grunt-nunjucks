@@ -13,7 +13,7 @@ module.exports = function (grunt) {
     var lib = require('nunjucks/src/lib');
 
     grunt.registerMultiTask('nunjucks', 'Render nunjucks', function () {
-        var data =  this.data.options.data;
+        var data =  this.data.options && this.data.options.data;
         this.files.forEach(function (f) {
             var src = f.src.filter(function (filepath) {
                 if (!grunt.file.exists(filepath)) {
